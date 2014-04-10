@@ -1,0 +1,177 @@
+Warning: redefining constant CPU_CORES
+period = 4.88548917
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+WARNING:root:Unrecognized parameter: '2MASS conflict flag'
+length of lightcurves = 36
+nseg = 11
+Noise = 0.00033189222270678425
+Noise = 0.000343498822794439
+Noise = 0.00033439968036763314
+Noise = 0.00037064499409758815
+Noise = 0.0003500537613047732
+Noise = 0.0003252881220340151
+Noise = 0.00036477092444122273
+Noise = 0.0003300530225720586
+Noise = 0.0003595918118899931
+Noise = 0.0003768223648436251
+Noise = 0.00030918823298207613
+length of TIME = 43152
+total time span = 30.034635840536794
+avg_t_step = 0.06
+df = 0.0008695652173913049
+
+p = 4.6
+4.618473895582329
+4.637096774193548
+4.655870445344129
+4.674796747967479
+4.693877551020408
+4.713114754098361
+4.732510288065843
+4.752066115702479
+4.771784232365144
+4.791666666666666
+4.811715481171548
+4.831932773109243
+4.852320675105485
+4.872881355932202
+4.8936170212765955
+4.914529914529915
+4.935622317596566
+4.956896551724138
+4.978354978354978
+
+trial_p = 4.6
+
+length_d = 77
+at trial_p = 4.6, best_logQ = -60.80305570023572
+(best_p,best_d,best_e) = (4.6,0.78,0.6599999999999999)
+trial_p = 4.618473895582329
+
+length_d = 77
+at trial_p = 4.618473895582329, best_logQ = -60.80305570023572
+(best_p,best_d,best_e) = (4.6,0.78,0.6599999999999999)
+trial_p = 4.637096774193548
+
+length_d = 77
+at trial_p = 4.637096774193548, best_logQ = -60.80305570023572
+(best_p,best_d,best_e) = (4.6,0.78,0.6599999999999999)
+trial_p = 4.655870445344129
+
+length_d = 78
+at trial_p = 4.655870445344129, best_logQ = -60.31071633785989
+(best_p,best_d,best_e) = (4.655870445344129,0.8999999999999999,3.6599999999999997)
+trial_p = 4.674796747967479
+
+length_d = 78
+at trial_p = 4.674796747967479, best_logQ = -60.31071633785989
+(best_p,best_d,best_e) = (4.655870445344129,0.8999999999999999,3.6599999999999997)
+trial_p = 4.693877551020408
+
+length_d = 78
+at trial_p = 4.693877551020408, best_logQ = -60.31071633785989
+(best_p,best_d,best_e) = (4.655870445344129,0.8999999999999999,3.6599999999999997)
+trial_p = 4.713114754098361
+
+length_d = 79
+at trial_p = 4.713114754098361, best_logQ = -60.31071633785989
+(best_p,best_d,best_e) = (4.655870445344129,0.8999999999999999,3.6599999999999997)
+trial_p = 4.732510288065843
+
+length_d = 79
+at trial_p = 4.732510288065843, best_logQ = -59.86257558294882
+(best_p,best_d,best_e) = (4.732510288065843,1.6199999999999999,3.06)
+trial_p = 4.752066115702479
+
+length_d = 79
+at trial_p = 4.752066115702479, best_logQ = -59.86257558294882
+(best_p,best_d,best_e) = (4.732510288065843,1.6199999999999999,3.06)
+trial_p = 4.771784232365144
+
+length_d = 80
+at trial_p = 4.771784232365144, best_logQ = -59.86257558294882
+(best_p,best_d,best_e) = (4.732510288065843,1.6199999999999999,3.06)
+trial_p = 4.791666666666666
+
+length_d = 80
+at trial_p = 4.791666666666666, best_logQ = -59.86257558294882
+(best_p,best_d,best_e) = (4.732510288065843,1.6199999999999999,3.06)
+trial_p = 4.811715481171548
+
+length_d = 80
+at trial_p = 4.811715481171548, best_logQ = -59.3907204816302
+(best_p,best_d,best_e) = (4.811715481171548,1.8599999999999999,2.88)
+trial_p = 4.831932773109243
+
+length_d = 81
+at trial_p = 4.831932773109243, best_logQ = -59.3907204816302
+(best_p,best_d,best_e) = (4.811715481171548,1.8599999999999999,2.88)
+trial_p = 4.852320675105485
+
+length_d = 81
+at trial_p = 4.852320675105485, best_logQ = -58.87056977426464
+(best_p,best_d,best_e) = (4.852320675105485,1.08,3.3)
+trial_p = 4.872881355932202
+
+length_d = 81
+at trial_p = 4.872881355932202, best_logQ = -58.87056977426464
+(best_p,best_d,best_e) = (4.852320675105485,1.08,3.3)
+trial_p = 4.8936170212765955
+
+length_d = 82
+at trial_p = 4.8936170212765955, best_logQ = -58.64963328752509
+(best_p,best_d,best_e) = (4.8936170212765955,1.38,2.76)
+trial_p = 4.914529914529915
+
+length_d = 82
+at trial_p = 4.914529914529915, best_logQ = -58.64963328752509
+(best_p,best_d,best_e) = (4.8936170212765955,1.38,2.76)
+trial_p = 4.935622317596566
+
+length_d = 82
+at trial_p = 4.935622317596566, best_logQ = -58.64963328752509
+(best_p,best_d,best_e) = (4.8936170212765955,1.38,2.76)
+trial_p = 4.956896551724138
+
+length_d = 83
+at trial_p = 4.956896551724138, best_logQ = -58.64963328752509
+(best_p,best_d,best_e) = (4.8936170212765955,1.38,2.76)
+trial_p = 4.978354978354978
+
+length_d = 83
+at trial_p = 4.978354978354978, best_logQ = -58.64963328752509
+(best_p,best_d,best_e) = (4.8936170212765955,1.38,2.76)
