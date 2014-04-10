@@ -1,0 +1,5 @@
+Transit Search
+
+This project searches for transiting planets candidates in Kepler data using Aigran & Irwin's transit search algorithm[1]. The code for transit search is the function transit_detection!(), whose input parameters are: (TIME,FLUX,length_f,f_min, f_max). TIME and FLUX are the preprocessed time array and flux array, length_f are the number of trial frequencies, f_min, f_max are the minimum and maximum of trial frequencies. The ouput of transit_detection!() is (best_p,best_d,best_e), i.e. the best estimated period, transit duration and epoch. 
+
+[1]http://arxiv.org/abs/astro-ph/0401393
