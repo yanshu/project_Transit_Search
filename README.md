@@ -16,7 +16,16 @@ Purpose: given the input time and flux array, fold the array using period p. Aft
 test_simulated_data.jl uses a simulated data set for a simple test. 
 The data shows has a period = 400, duration = 25 and epoch = 50. See the plot SimulatedDataTest.png for this simulated data set.
 Run the code with trial frequency range [1/403, 1/397] and number of trial frequency = 100, the result gives: (best_p, best_d, best_e) = (399.5579641376555,26.0,49.0), it is close to the true value.
-Run Time:It uses 147.44s to run on a laptop with a 2.9 GHz Intel Core i7 and 8 GB memroy. It uses 160.0s to run on Tesla with 1 core.
+Run Time: It uses 147.44s to run on a laptop with a 2.9 GHz Intel Core i7 and 8 GB memroy. It uses 160.0s to run on Tesla with 1 core.
+Change number of total input data points:
+(1) number of total input data points: 1000:
+total run time = 147.44s, time spent in phase folding:  0.04613s
+(2) number of total input data points: 10000:
+total run time = 146.58s, time spend in phase folding:  0.42418s
+(2) number of total input data points: 100000:
+total run time = 156.7s, time spend in phase folding:  2.86s
+
+We see as the total size of input array increases, the total process time does not change too much, but the time spent in phase folding increase linearly with the size.
 
 ### One planet test
 
