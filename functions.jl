@@ -32,7 +32,7 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
     end
     avg_t_step = sum_time_gaps/n_time_gaps	# use the normal definition for simulated_data test
     println("Time used in getting avg_t_step:")
-    tok()
+    toq()
     #avg_t_step = 0.003 		# for the one_planet_test, use 0.003, a larger step to speed things up
     println("	trial duration and trial epoch step: avg_t_step = ", avg_t_step)
 
@@ -44,7 +44,7 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
         p[i]= 1./(trial_f_max - (i-1)*df)
     end
     println("Time used in getting avg_t_step:")
-    tok()
+    toq()
 
     # calculate log10(Q)(p,d,e) for each trial period, trial duration, trial epoch
     best_logQ =	-10000 		# best_logQ is used to store the largest logQ for all (p,d,e), initialized to be a very small value
@@ -56,7 +56,7 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
 	tic()
         (foldedTIME,foldedFLUX) = phase_folding!(TIME,FLUX,trial_p,avg_t_step)
 	println("Time used for phase_folding:")
-	tok()
+	toq()
         # at this given trial period, get the trial duration array, trial duration step = avg_t_step, the maximum trial duration = trial period
         length_d = int(trial_p/avg_t_step)
     	local_best_logQ = -10000 		# best logQ for the current trial period, initialized to be a very small value
