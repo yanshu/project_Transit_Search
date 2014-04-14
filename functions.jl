@@ -36,7 +36,7 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
     #avg_t_step = 0.003 		# for the one_planet_test, use 0.003, a larger step to speed things up
     println("	trial duration and trial epoch step: avg_t_step = ", avg_t_step)
 
-    # get the trial period array p[] from trial frequency
+    # get the trial arrays p[], d[] and e[]
     tic()
     p=zeros(Float64,length_f)
     length_p = length_f
@@ -44,11 +44,14 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
     for i=1:length_p
         p[i]= 1./(trial_f_max - (i-1)*df)
     end
-    for j=1:p[end]/avg_t_step	 # p[end]/avg_t_step is the largest possible length for the duration array
-        d[j] = avg_t_step*j      # trial duration step = avg_t_step
-	e[j] = 
+    max_length_d_and_e = int(p[end]/avg_t_step)
+    d=zeros(Float64,max_length_d_and_e)
+    e=zeros(Float64,max_length_d_and_e)
+    for i=1:max_length_d_and_e	 # p[end]/avg_t_step is the largest possible length for the duration array, even though we only need a portion of them, because given a duration value d[i], the length of e we need is only length_d-i+1
+        d[i] = avg_t_step*i      # trial duration and epoch step = avg_t_step
+	e[i] = avg_t_step*(i-1)		# e[1] = 0.
     end
-    println("Time used in getting trial period array p[]:")
+    println("Time used in getting trial arrays p, e and d:")
     toc()
 
     # calculate log10(Q)(p,d,e) for each trial period, trial duration, trial epoch
@@ -66,18 +69,14 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
         length_d = int(trial_p/avg_t_step)
     	local_best_logQ = -10000 		# best logQ for the current trial period, initialized to be a very small value
 	(local_best_p,local_best_d,local_best_e) = (0.,0.,0.)		# best logQ for the current trial period
-        d = zeros(length_d)	# trial durations array
         for j=1:length_d	# loop through all trial durations
             trial_d = d[j]
-            # at a given trial duration, get the trial epoch array, the minimum trial epoch = 0, trial epoch step = avg_t_step,too, so length of e is:
+            # at this given trial duration, get the trial epoch array, the minimum trial epoch = 0, trial epoch step = avg_t_step,too, so length of e is:
             length_e = length_d-j+1
-            e = zeros(length_e)			# trial epochs array
-            I_index = []                        # the array to store in-transit data points' index
+            I_index = []                        # the array to store in-transit data points' indices
             current_idx = 1                     # the index used in the searching for transit times
             for k=1:length_e
-                e[k]= avg_t_step*(k-1)		# fill trial epochs array
                 trial_e = e[k]
-		println("e[",k,"]=", e[k])
                 I_index = get_in_transit_index!(foldedTIME,trial_e,trial_d,current_idx)		# get the indices of all in-transit data points
 		if length(I_index)==0			# if there is no in-transit data points, move to the next epoch
 			current_idx+=1
