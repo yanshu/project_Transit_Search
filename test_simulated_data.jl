@@ -1,7 +1,7 @@
 include("functions.jl")
 using PyCall
 @pyimport kplr
-@pyimport matplotlib.pyplot as pl
+#@pyimport matplotlib.pyplot as pl
 
 TIME = zeros(1000)
 for i=1:1000
@@ -18,7 +18,7 @@ for i=450:475
 end
 FLUX[450] -= 0.5
 FLUX[475] -= 0.5
-for i=950:975
+for i=850:875
 	FLUX[i] += -1.+rand()*0.1
 end
 FLUX[850] -= 0.5
@@ -35,5 +35,5 @@ FLUX[875] -= 0.5
 tic()
 transit_detection!(TIME,FLUX,length_f,f_min, f_max);
 println("\n","Total time used in transit_detection!():")
-tok()
+toc()
 
