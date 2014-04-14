@@ -32,5 +32,8 @@ FLUX[875] -= 0.5
 # f_min and f_max are the minimum and maximum trial frequency. f_min must >= 1/total time span.
 
 (length_f,f_min, f_max) = (100,1/403.,1/397.)
+tic()
 transit_detection!(TIME,FLUX,length_f,f_min, f_max);
+println("\n","Total time used in transit_detection!():")
+tok()
 
