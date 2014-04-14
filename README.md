@@ -5,13 +5,19 @@ This project searches for transiting planets candidates in Kepler data using Aig
 
 The core code for transit search is the function: transit_detection!(), whose input parameters are: (TIME,FLUX,length_f,f_min, f_max). TIME and FLUX are the preprocessed time array and flux array, length_f is the number of trial frequencies, f_min, f_max are the minimum and maximum trial frequencies. The output of transit_detection!() is ((best_p,best_d,best_e,best_logQ,logQ_p), i.e. the best estimated period, transit duration and epoch, the corresponding logQ value and the array that stores each logQ value for each trial period.
 
-The main process of transit_detection!() is: (1) For a given trial period value, do [phase folding] to the input FLUX; (2) For each trial duration and trial epoch, calculate the logQ for the phase-folded FLUX; (3) Compare all logQ values, get the maximum, the the corresponding (p, e, d) is the best estimated result.
+The main process of transit_detection!() is: (1) For a given trial period value, do phase folding; (2) For each trial duration and trial epoch, identify the in transit data points, and calculate the logQ; (3) Compare all logQ values, get the maximum, then the corresponding (p, e, d) is the best estimated result.
+
+### phase folding
+
+Purpose: given the input time and flux array, fold the array using period p. After the folding, the input time flux's range is [0,p]. 
 
 ### Simulated data test
 
 test_simulated_data.jl uses a simulated data set for a simple test. 
 The data shows has a period = 400, duration = 25 and epoch = 50. See the plot SimulatedDataTest.png for this simulated data set.
 Run the code with trial frequency range [1/403, 1/397] and number of trial frequency = 100, the result gives: (best_p, best_d, best_e) = (399.5579641376555,26.0,49.0), it is close to the true value.
+Time:
+It uses 148.06s to run on a laptop with a 2.9 GHz Intel Core i7 and 8 GB memroy. It uses 163.8s to run on Tesla with 1 core.
 
 ### One planet test
 
@@ -20,7 +26,6 @@ It uses only 4 usable segments of one lightcurve of a known planet (KOI 97.01), 
 The best estimated results are: period = 4.890738813735692 days, duration = 4.536 hours
 The true values are: period = 4.88548917 days, duration = 5.2295 hours
 
-### (phase folding)
 
 
 [1]Aigran & Irwin 2004 (http://arxiv.org/abs/astro-ph/0401393)
