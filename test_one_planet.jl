@@ -1,8 +1,7 @@
-#include("/gpfs/home/fxh140/Astro585/project_Transit_Search/functions.jl")
 include("functions.jl")
 using PyCall
 @pyimport kplr
-#@pyimport matplotlib.pyplot as pl
+@pyimport matplotlib.pyplot as pl
 
 
 # download lightcurve data
