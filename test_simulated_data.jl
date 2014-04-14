@@ -1,7 +1,7 @@
 include("functions.jl")
 using PyCall
 @pyimport kplr
-#@pyimport matplotlib.pyplot as pl
+@pyimport matplotlib.pyplot as pl
 
 TIME = zeros(1000)
 for i=1:1000
