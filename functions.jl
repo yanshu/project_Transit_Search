@@ -41,44 +41,48 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
     p=zeros(Float64,length_f)
     length_p = length_f
     df = (trial_f_max - trial_f_min)/length_f   # trial frequency step
-    for i=1:length_f
+    for i=1:length_p
         p[i]= 1./(trial_f_max - (i-1)*df)
     end
-    println("Time used in getting avg_t_step:")
+    for j=1:p[end]/avg_t_step	 # p[end]/avg_t_step is the largest possible length for the duration array
+        d[j] = avg_t_step*j      # trial duration step = avg_t_step
+	e[j] = 
+    end
+    println("Time used in getting trial period array p[]:")
     toc()
 
     # calculate log10(Q)(p,d,e) for each trial period, trial duration, trial epoch
     best_logQ =	-10000 		# best_logQ is used to store the largest logQ for all (p,d,e), initialized to be a very small value
     (best_p,best_d,best_e) = (0.,0.,0.)		# best_p, best_d, best_e are used to store the period, duration, epoch corresponding the best_logQ
     logQ_p=zeros(length_p)	# an array to store the logQ value for each trial period
+    time_phase_folding = 0.	# record the time for doing phase folding
     for i=1:length_p		# loop through all trial periods
         # at a given trial period, do phase-folding, foldedTIME[] is the array to store folded time , foldedFLUX[] is the folded flux
         trial_p = p[i]
 	tic()
         (foldedTIME,foldedFLUX) = phase_folding!(TIME,FLUX,trial_p,avg_t_step)
-	println("Time used for phase_folding:")
-	toc()
+	time_phase_folding += toq()
         # at this given trial period, get the trial duration array, trial duration step = avg_t_step, the maximum trial duration = trial period
         length_d = int(trial_p/avg_t_step)
     	local_best_logQ = -10000 		# best logQ for the current trial period, initialized to be a very small value
 	(local_best_p,local_best_d,local_best_e) = (0.,0.,0.)		# best logQ for the current trial period
         d = zeros(length_d)	# trial durations array
         for j=1:length_d	# loop through all trial durations
-            d[j] = avg_t_step*j      # trial duration step = avg_t_step
             trial_d = d[j]
             # at a given trial duration, get the trial epoch array, the minimum trial epoch = 0, trial epoch step = avg_t_step,too, so length of e is:
-            length_e = length_d - j
+            length_e = length_d-j+1
             e = zeros(length_e)			# trial epochs array
             I_index = []                        # the array to store in-transit data points' index
             current_idx = 1                     # the index used in the searching for transit times
             for k=1:length_e
                 e[k]= avg_t_step*(k-1)		# fill trial epochs array
                 trial_e = e[k]
-                I_index = get_in_transit_index!(foldedTIME,trial_e,trial_d,current_idx)		# get the indices of all in transit data points
-		if length(I_index)==0			# if there is no in transit data points, move to the next epoch
+		println("e[",k,"]=", e[k])
+                I_index = get_in_transit_index!(foldedTIME,trial_e,trial_d,current_idx)		# get the indices of all in-transit data points
+		if length(I_index)==0			# if there is no in-transit data points, move to the next epoch
 			current_idx+=1
 			continue
-		else			# if we get the indices for in transit data, calculate the logQ value
+		else				# if there is in-transit data points, calculate the logQ value for these points
                 	logQ = calculate_logQ!(I_index,foldedFLUX,trial_p,trial_d,trial_e,noise)
 			if(logQ>local_best_logQ)
 				local_best_logQ = logQ
@@ -86,16 +90,18 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
 			end
 		end
             end
-        end
+	end
 	logQ_p[i] = local_best_logQ
 	if(local_best_logQ>best_logQ)
                 best_logQ = local_best_logQ
-		(best_p,best_d,best_e) = (local_best_p,local_best_d,local_best_e) 
-	end
-	println("  for trial_p = ", trial_p, ", best_logQ = ", local_best_logQ, ", (best_p,best_d,best_e) = ", (local_best_p,local_best_d,local_best_e),"\n")
-     end
-     println("Finishing transit detection, of all trial periods,durations and epochs, the best one is : (best_p, best_d, best_e) = ",(best_p, best_d, best_e), "\n")
-     return (best_p,best_d,best_e,best_logQ,logQ_p)
+		(best_p,best_d,best_e) = (local_best_p,local_best_d,local_best_e)
+    	end
+    	println("  for trial_p = ", trial_p, ", best_logQ = ", local_best_logQ, ", (best_p,best_d,best_e) = ", (local_best_p,local_best_d,local_best_e),"\n")
+    end
+    
+    println("Finishing transit detection, of all trial periods,durations and epochs, the best one is : (best_p, best_d, best_e) = ",(best_p, best_d, best_e), "\n")
+    println("Time used in phase folding: ", time_phase_folding)
+    return (best_p,best_d,best_e,best_logQ,logQ_p)
 end
 
 function calculate_logQ!(I_index::Array,foldedFLUX::Array,trial_p::Float64,trial_d::Float64,trial_e::Float64,noise::Float64)
@@ -107,8 +113,8 @@ function calculate_logQ!(I_index::Array,foldedFLUX::Array,trial_p::Float64,trial
 end
 
 function get_in_transit_index!(foldedTIME::Array,trial_e::Float64,trial_d::Float64, current_idx::Int64)
-    if current_idx >= length(foldedTIME)
-	return Int64[]
+    if current_idx > length(foldedTIME)
+        return Int64[]
     end
     # search for in-transit data points in foldedTIME[]
     trial_transit_end = trial_e + trial_d
@@ -117,23 +123,22 @@ function get_in_transit_index!(foldedTIME::Array,trial_e::Float64,trial_d::Float
     while(foldedTIME[current_idx] < trial_e)
         current_idx+=1
     end     # after this while loop, foldTIME[current_idx] >= trial_e
-    if(current_idx ==1 || foldedTIME[current_idx] >=  trial_e && foldedTIME[current_idx-1] < trial_e)
-        while(foldedTIME[current_idx] < trial_transit_end)
-            # step forward and get the index for the transit
+    if(current_idx ==1 || foldedTIME[current_idx-1] < trial_e)          # it is the 1st element after the trial_e, i.e. the start of the transit, so
+        while(current_idx <= length(foldedTIME) && foldedTIME[current_idx] < trial_transit_end) # we step forward and record the indices for the transit
             append!(I_index,[current_idx])
             current_idx += 1
-        end # after this while loop, foldedTIME[current_idx] >= trial_transit_end
-    else
-        while(foldedTIME[current_idx] >=  trial_e)
+        end             # after this while loop, foldedTIME[current_idx] >= trial_transit_end or foldedTIME[current_idx] is the last array element
+    else        # it has some distance to the 1st element after the trial_e, so move backward to get to that element
+        while(current_idx >0 && foldedTIME[current_idx] >=  trial_e)
             current_idx -= 1
-        end     # after this while loop, foldedTIME[current_idx] < trial_e, so we need to add 1 to it.
-        current_idx +=1             # then step forward again
-        while(foldedTIME[current_idx] < trial_transit_end)
+        end     # after this while loop, foldedTIME[current_idx] < trial_e, so we need to add 1 to it
+        current_idx +=1             # now, current_idx is the 1st element after trial_e, so we can step forward again, and add indices to I_index
+        while(current_idx <= length(foldedTIME) && foldedTIME[current_idx] < trial_transit_end)
             append!(I_index,[current_idx])
             current_idx += 1
         end
     end
-    # when this function finishes, current_idx = 1+ the index corresponding the last in-transit point
+    # when this function finishes, current_idx = 1+ the index of the last in-transit point
     return I_index
 end
 
