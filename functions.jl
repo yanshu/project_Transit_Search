@@ -1,5 +1,5 @@
 # This script contains five functions:
-# and four core functions for transit detection:
+# four core functions for transit detection:
 # (1) transit_detection!()
 # (2) phase_folding!()
 # (3) calculate_logQ!()
@@ -12,7 +12,7 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
     println("Entering transit_detection function")
     @assert length(TIME) == length(FLUX)
     @assert typeof(length_f) == Int64
-    tot = TIME[end]-TIME[1]        # total time span, the trial_f_min must be larger than tot
+    tot = TIME[end]-TIME[1]        # total time span, the trial_f_min must be larger than 1/tot
     @assert trial_f_min >= 1/tot
 
     # get the noise for FLUX array
@@ -29,8 +29,8 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
             n_time_gaps += 1
         end
     end
-    #avg_t_step = sum_time_gaps/n_time_gaps	# use the normal definition for simulated_data test
-    avg_t_step = 0.003 		# for the one_planet_test, use 0.003, a larger step to speed things up
+    avg_t_step = sum_time_gaps/n_time_gaps	# use the normal definition for simulated_data test
+    #avg_t_step = 0.003 		# for the one_planet_test, use 0.003, a larger step to speed things up
     println("	trial duration and trial epoch step: avg_t_step = ", avg_t_step)
 
     # get the trial period array p[] from trial frequency
@@ -132,6 +132,7 @@ function get_in_transit_index!(foldedTIME::Array,trial_e::Float64,trial_d::Float
 end
 
 function phase_folding!(TIME::Array, FLUX::Array, period::Float64, avg_t_step::Float64)
+    @assert length(TIME) == length(FLUX)
     println("  Entering phase_folding function")
     n_time = length(TIME)
     println("  before phase folding, length of FLUX array = ", n_time)
@@ -212,8 +213,7 @@ function plotEverything(TIME::Array, FLUX::Array,fileName::String)
     y_max += (y_max - y_min)*0.05
     pl.xlim([x_min,x_max])
     pl.ylim([y_min,y_max])
-    fig_name = string("/gpfs/home/fxh140/Astro585/project/logQ_p_", fileName , ".pdf")
-    #fig_name = string("/Users/feifeihuang/project/plots/all_segment", fileName , ".pdf")
+    fig_name = string("logQ_p_", fileName , ".png")
     pl.savefig(fig_name)
     pl.show()
     return
