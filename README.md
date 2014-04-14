@@ -7,17 +7,16 @@ The core code for transit search is the function: transit_detection!(), whose in
 
 The main process of transit_detection!() is: (1) For a given trial period value, do phase folding; (2) For each trial duration and trial epoch, identify the in transit data points, and calculate the logQ; (3) Compare all logQ values, get the maximum, then the corresponding (p, e, d) is the best estimated result.
 
-### phase folding
+### Phase folding
 
-Purpose: given the input time and flux array, fold the array using period p. After the folding, the input time flux's range is [0,p]. 
+Purpose: given the input time and flux array, fold the array using period p. After the folding, the time range is [0,p]. 
 
 ### Simulated data test
 
 test_simulated_data.jl uses a simulated data set for a simple test. 
 The data shows has a period = 400, duration = 25 and epoch = 50. See the plot SimulatedDataTest.png for this simulated data set.
 Run the code with trial frequency range [1/403, 1/397] and number of trial frequency = 100, the result gives: (best_p, best_d, best_e) = (399.5579641376555,26.0,49.0), it is close to the true value.
-Time:
-It uses 148.06s to run on a laptop with a 2.9 GHz Intel Core i7 and 8 GB memroy. It uses 163.8s to run on Tesla with 1 core.
+Time:It uses 147.44s to run on a laptop with a 2.9 GHz Intel Core i7 and 8 GB memroy. It uses 160.0s to run on Tesla with 1 core.
 
 ### One planet test
 
