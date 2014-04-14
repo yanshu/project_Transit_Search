@@ -21,11 +21,11 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
     
     # get the avage time gap between consecutive data points avg_t_step, it will be used as the trial duration and epoch step
     tic()
-    n_time_gaps = 0
     n = length(TIME)
     sum_time_gaps = 0
+    n_time_gaps = 0
     for i=2:n
-        if(TIME[i]-TIME[i-1]<1)     # significant time gaps are not counted
+        if(TIME[i]-TIME[i-1]<5)     # significant time gaps are not counted
             sum_time_gaps += TIME[i] - TIME[i-1]
             n_time_gaps += 1
         end
