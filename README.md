@@ -15,7 +15,7 @@ Purpose: given the input time and flux array, fold the array using period p. Aft
 
 test_simulated_data.jl uses a simulated data set for a simple test. (To run this test, remember to comment line36 in functions.jl and uncomment line33; because we need the avg_t_step parameter to be set as the default definition)
 
-The data shows has a period = 400, duration = 25 and epoch = 50. See the plot SimulatedDataTest.png for this simulated data set.
+The simulated data has a period = 400, duration = 25 and epoch = 50. See the plot SimulatedDataTest.png for this simulated data set.
 Run the code with trial frequency range [1/403, 1/397] and number of trial frequency = 100, the result gives: (best_p, best_d, best_e) = (399.5579641376555,26.0,49.0), it is close to the true value.
 
 Run Time: It uses 147.44s to run on a laptop with a 2.9 GHz Intel Core i7 and 8 GB memroy. It uses 160.0s to run on Tesla with 1 core. Most of the process time is spent in the get_in_transit_index() function:
