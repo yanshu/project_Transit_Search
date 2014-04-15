@@ -43,6 +43,8 @@ Time used in calculate_logQ: 8.78 s
 We see: (1) Most of the process time is spent in the get_in_transit_index() function;
 (2) as the total size of input flux array increases, the total process time increases, and the time spent in phase folding increase almost linearly with input array size, while other functions spent more or less similar time.
 
+So for parallelization, we need to work on the get_in_transit_index!() function.
+
 ### One planet test
 
 transit_search_test.jl is a small, crude test using true kepler data of a confirmed planet.	(To run it, remember to comment line33 in functions.jl and uncomment line36, because here we want t_avg_step to be 0.003 days)
