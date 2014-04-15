@@ -5,16 +5,17 @@ using PyCall
 
 # generate a simulated TIME and FLUX array with period = 400, duration = 25, epoch = 50
 
-n = 10000	# total number of data points
+n = 1000	# total number of data points
 p = 400
 d = 25
 
+println("nprocs :", nprocs())
 TIME = zeros(n)
 for i=1:n
 	TIME[i] += i
 end
 FLUX = randn(n)*0.1
-e = [50+400*i for i=0:ifloor((n-50)/p)]		# all the starting time of transits 
+e = [50+p*i for i=0:ifloor((n-50)/p)]		# all the starting time of transits 
 for e_idx = 1:length(e)
 	for i=e[e_idx]:e[e_idx]+d
 		FLUX[i] += -1.+rand()*0.1
