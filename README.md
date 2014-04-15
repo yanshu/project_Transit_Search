@@ -13,7 +13,7 @@ Purpose: given the input time and flux array, fold the array using period p. Aft
 
 ### Simulated data test
 
-test_simulated_data.jl uses a simulated data set for a simple test. (To run it, remember to comment line36 in functions.jl and uncomment line33; because we need the avg_t_step parameter to be set as the default vaule)
+test_simulated_data.jl uses a simulated data set for a simple test. (To run this test, remember to comment line36 in functions.jl and uncomment line33; because we need the avg_t_step parameter to be set as the default definition)
 
 The data shows has a period = 400, duration = 25 and epoch = 50. See the plot SimulatedDataTest.png for this simulated data set.
 Run the code with trial frequency range [1/403, 1/397] and number of trial frequency = 100, the result gives: (best_p, best_d, best_e) = (399.5579641376555,26.0,49.0), it is close to the true value.
