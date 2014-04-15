@@ -77,11 +77,11 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
             trial_d = d[j]
             # at this given trial duration, get the trial epoch array, the minimum trial epoch = 0, trial epoch step = avg_t_step,too, so length of e is:
             length_e = length_d-j+1
-            #current_idx = 1                     # the index used in the searching for transit times
+            current_idx = 1                     # the index used in the searching for transit times
             for k=1:length_e
                 trial_e = e[k]
 		tic()
-                I_index = get_in_transit_index!(foldedTIME,trial_e,trial_d,1)		# get the indices of all in-transit data points
+                I_index = get_in_transit_index!(foldedTIME,trial_e,trial_d,current_idx)		# get the indices of all in-transit data points
 		time_get_in_transit_index += toq()
 		if length(I_index)==0			# if there is no in-transit data points, move to the next epoch
 			current_idx+=1
