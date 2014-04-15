@@ -16,18 +16,30 @@ Purpose: given the input time and flux array, fold the array using period p. Aft
 test_simulated_data.jl uses a simulated data set for a simple test. 
 The data shows has a period = 400, duration = 25 and epoch = 50. See the plot SimulatedDataTest.png for this simulated data set.
 Run the code with trial frequency range [1/403, 1/397] and number of trial frequency = 100, the result gives: (best_p, best_d, best_e) = (399.5579641376555,26.0,49.0), it is close to the true value.
-Run Time: It uses 147.44s to run on a laptop with a 2.9 GHz Intel Core i7 and 8 GB memroy. It uses 160.0s to run on Tesla with 1 core. Most of the process time is spent in the 3-level loop in transit_detection!().
-Change number of total input data points:
-(1) number of total input data points: 1000:
-total run time = 147.44s, time spent in phase folding:  0.04613s
-(2) number of total input data points: 10000:
-total run time = 146.58s, time spend in phase folding:  0.42418s
-(2) number of total input data points: 100000:
-total run time = 156.7s, time spend in phase folding:  2.86s
-(2) number of total input data points: 1000000:
-total run time = 188.9s, time spend in phase folding:  29.4s
+Run Time: It uses 147.44s to run on a laptop with a 2.9 GHz Intel Core i7 and 8 GB memroy. It uses 160.0s to run on Tesla with 1 core. Most of the process time is spent in the get_in_transit_index() function:
 
-We see as the total size of input flux array increases, the total process time does not change too much, but the time spent in phase folding increase almost linearly with input array size.
+(1) number of total input data points: 1000:
+total run time = 159.3 s, Time used in phase folding: 0.046 s
+Time used in get_in_transit_index: 137.26 s
+Time used in calculate_logQ: 9.11 s
+
+(2) number of total input data points: 10000:
+total run time = 158.6 s, time spend in phase folding:  0.289 s
+Time used in calculate_logQ: 9.32 s
+Time used in get_in_transit_index: 136.40 s
+
+(3) number of total input data points: 100000:
+total run time = 169.0 s, Time used in phase folding: 2.69 s
+Time used in calculate_logQ: 9.70 s
+Time used in get_in_transit_index: 143.6 s
+
+(4) number of total input data points: 1000000:
+total run time = 188.9s, time spend in phase folding:  28.16 s
+Time used in get_in_transit_index: 134.2s
+Time used in calculate_logQ: 8.78 s
+
+We see: (1) Most of the process time is spent in the get_in_transit_index() function;
+(2) as the total size of input flux array increases, the total process time increases, and the time spent in phase folding increase almost linearly with input array size, while other functions spent more or less similar time.
 
 ### One planet test
 
