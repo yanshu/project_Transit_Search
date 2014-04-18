@@ -1,12 +1,13 @@
-include("functions.jl")
+#include("functions_modified.jl")
+include("functions.jl")		# this is faster than functions_modified.jl
 using PyCall
 @pyimport kplr
 #@pyimport matplotlib.pyplot as pl
 
 # generate a simulated TIME and FLUX array with period = 400, duration = 25, epoch = 50
 
-n = 1000	# total number of data points
-p = 400
+n = 1024*1024	# total number of data points
+p = 401
 d = 25
 
 println("nprocs :", nprocs())
@@ -31,7 +32,6 @@ end
 
 (length_f,f_min, f_max) = (100,1/403.,1/397.)
 tic()
-transit_detection!(TIME,FLUX,length_f,f_min, f_max);
-println("\n","Total time used in transit_detection!():")
-toc()
+transit_detection!(TIME,FLUX,length_f,f_min, f_max)
+println("Total time used in transit_detection!():",toq())
 

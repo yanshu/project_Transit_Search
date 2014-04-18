@@ -62,20 +62,34 @@ Run Time: 2225.0 s on Tesla with 1 core.
 
 ### Parallelization using distributed arrays
 
-para_functions.jl shows the core functions needed for parallelization of the original code. Most of the functions in it are the same with functions.jl , the most important change is in transit_detection!() funcntion, where the 3-layer for loops is modified and a new function get_in_transit_index_and_calc_logQ! is created to make it easy to parallelize:
-```
-for i=1:length_p            # loop through all trial periods
-        for j=1:max_length_d_and_e      # loop through all trial durations for this period
-            (best_p,best_d,best_e,best_logQ) = get_in_transit_index_and_calc_logQ!(foldedTIME[i], foldedFLUX[i],p,d,e,i,j,best_logQ,best_p,best_d,best_e,avg_t_step,noise)
-        end
-    end
-```
+#### Simulated data test
+
+para_functions.jl shows the core functions needed for parallelization of the original code. Most of the functions in it are the same with functions.jl , the most important change is in transit_detection!() funcntion, where the 3-layer for loops is modified and a new function get_in_transit_index_and_calc_logQ! is created to make it easy to parallelize.
+
+The index [i,j] are distributed over several processors.
 
 Run 
 ```
 julia -p n para_simulated_data.jl 
 ```
-to test the parallelization for simulated data.
+to test the parallelization for simulated data. (n is the number of processors)
 
+Run time: (Telsa)
+
+(1) p = 1: Total time used in transit_detection!():287.999556124
+
+(2) p = 2: Total time used in transit_detection!():201.165814611
+
+(3) p = 3: Total time used in transit_detection!():164.394760586
+
+(4) p = 4: Total time used in transit_detection!():92.800300958
+
+(5) p = 5: Total time used in transit_detection!():75.746334368
+
+(6) p = 6: Total time used in transit_detection!():69.948586224
+
+(7) p = 7: 
+
+(8) p = 8: Total time used in transit_detection!():57.220656825
 
 [1]Aigran & Irwin 2004 (http://arxiv.org/abs/astro-ph/0401393)

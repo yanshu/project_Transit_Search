@@ -1,7 +1,7 @@
 include("functions.jl")
 using PyCall
 @pyimport kplr
-@pyimport matplotlib.pyplot as pl
+#@pyimport matplotlib.pyplot as pl
 
 
 # download lightcurve data
@@ -69,8 +69,10 @@ println("Finished data points selection, number of good data points = ", length(
 # the output paramete is (best_period, best_duration, best_epoch, best_logQ, logQ_p). (logQ_p is an array of logQ values for each trial period)
 
 (length_f,f_min, f_max) = (20,1/5.,1/4.7)
-
+tic()
 result = transit_detection!(TIME,FLUX,length_f,f_min, f_max);
+println("Time used to run transit_detection:")
+toc()
 
 println("The best estimated period and duration for this planet is: period = ",result[1], " days, duration = ", result[2]*24, " hours") 
 println("The true period and duration is : period = ",koi[:koi_period], " days, duration = ", koi[:koi_duration], " hours")
