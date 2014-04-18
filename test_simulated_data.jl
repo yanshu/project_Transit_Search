@@ -1,4 +1,3 @@
-#include("functions_modified.jl")
 include("functions.jl")		# this is faster than functions_modified.jl
 using PyCall
 @pyimport kplr
