@@ -76,20 +76,22 @@ to test the parallelization for simulated data. (n is the number of processors)
 
 Run time: (Telsa)
 
-(1) p = 1: Total time used in transit_detection!():287.999556124
+(1) p = 1: Total time used in transit_detection!():235.974000392
 
-(2) p = 2: Total time used in transit_detection!():201.165814611
+(2) p = 2: Total time used in transit_detection!():123.928522869
 
-(3) p = 3: Total time used in transit_detection!():164.394760586
+(3) p = 3: Total time used in transit_detection!():128.286416456
 
-(4) p = 4: Total time used in transit_detection!():92.800300958
+(4) p = 4: Total time used in transit_detection!():99.218811207
 
-(5) p = 5: Total time used in transit_detection!():75.746334368
+(5) p = 5: Total time used in transit_detection!():107.634166859 
 
-(6) p = 6: Total time used in transit_detection!():69.948586224
+(6) p = 6: Total time used in transit_detection!():71.39507179
 
-(7) p = 7: 
+(7) p = 7: Total time used in transit_detection!():71.575478587
 
 (8) p = 8: Total time used in transit_detection!():57.220656825
+
+The reason why p=2 & 3, p=4&5 p=6&7 spent similar time will be explained later.
 
 [1]Aigran & Irwin 2004 (http://arxiv.org/abs/astro-ph/0401393)
