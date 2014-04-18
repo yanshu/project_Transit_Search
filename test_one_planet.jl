@@ -3,7 +3,6 @@ using PyCall
 @pyimport kplr
 #@pyimport matplotlib.pyplot as pl
 
-
 # download lightcurve data
 client = kplr.API()
 println("Downloading lightcurves of planet candidate : KOI 97.01")
