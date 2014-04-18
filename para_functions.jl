@@ -10,7 +10,7 @@
 # The other three functions are the same.
 
 function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min::Float64,trial_f_max::Float64)
-    println("Entering transit_detection function")
+    println("Entering transit_detection function ... ")
     @assert length(TIME) == length(FLUX)
     @assert typeof(length_f) == Int64
     tot = TIME[end]-TIME[1]        # total time span, the trial_f_min must be larger than 1/tot
@@ -31,9 +31,9 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
             n_time_gaps += 1
         end
     end
-    avg_t_step = sum_time_gaps/n_time_gaps	# use the normal definition for simulated_data test
+    avg_t_step = sum_time_gaps/n_time_gaps	# uncomment this line for simulated_data test, this should be the default definition for avg_t_step
     println("Time used in getting avg_t_step:",toq())
-    #avg_t_step = 0.003 		# for the one_planet_test, use 0.003, a larger step to speed things up
+    #avg_t_step = 0.003 		# uncomment this line for the one_planet_test, use a larger step to get a quick test
     println("   trial duration and trial epoch step: avg_t_step = ", avg_t_step)
 
     # get the trial arrays p[], d[] and e[]
@@ -81,7 +81,7 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
 	for l= length(sub_array)
 		result = append!(result,[sub_array[l]])
 	end
-	println("size of array from Processor No.",proc," = ",length(fetch(refs[proc])))
+	println("size of array from Processor No.",proclist[proc]," = ",length(fetch(refs[proc])))
     end
     println("   Finishing calculation of logQ")
     time_calc_logQ = toq()
@@ -167,9 +167,9 @@ end
 
 function phase_folding!(TIME::Array, FLUX::Array, period::Float64, avg_t_step::Float64)
     @assert length(TIME) == length(FLUX)
-    #println("  Entering phase_folding function")
+    #println("  Entering phase_folding function ... ")
     n_time = length(TIME)
-    #println("  before phase folding, length of FLUX array = ", n_time)
+    #println("   before phase folding, length of FLUX array = ", n_time)
     t0 = TIME[1]
     phase=zeros(Float64,n_time)
     for i=2:n_time
@@ -208,6 +208,32 @@ function phase_folding!(TIME::Array, FLUX::Array, period::Float64, avg_t_step::F
         append!(goodMergedTIME,[mergedTIME[good_index[i]]])
         append!(goodMergedFLUX,[mergedFLUX[good_index[i]]])
     end
-    #println("  Exiting phase_folding, after phase folding, length of FLUX array = ", length(goodMergedFLUX))
+    #println("   after phase folding, length of FLUX array = ", length(goodMergedFLUX))
     return (goodMergedTIME, goodMergedFLUX)
+end
+
+function getSegmentIndex(Ngood::Int64, Nbad::Int64,index::Array)
+    # Ngood: minimum number of good points in a row
+    # Nbad:  number of bad points in a row makes the segment break
+    n = length(index)
+    segment = Any[]
+    push!(segment,[index[1]])
+    for i = 1:n-1
+        Nseg = length(segment)         # the current length of segment[]
+        if (Nseg == 0)
+            push!(segment,[index[i+1]])
+        else
+            if(index[i+1] - index[i] < Nbad)
+                append!(segment[Nseg],[index[i+1]])
+            elseif(length(segment[Nseg]) < Ngood)
+                pop!(segment)
+            else
+                push!(segment,[index[i+1]])
+            end
+        end
+    end
+    if(length(segment[end]) < Ngood)        # check the last element
+        pop!(segment)
+        end
+    return segment
 end
