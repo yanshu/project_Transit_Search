@@ -209,7 +209,7 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
     result = Any[]
     for proc in 1:length(proclist)
  	result = append!(result,fetch(refs[proc]))
-        println("size of array from Processor No.",proclist[proc]," = ",length(fetch(refs[proc])))
+        println("size of array from worker ",proclist[proc]," = ",length(fetch(refs[proc])))
     end
     println("   Finishing calculation of logQ")
     time_calc_logQ = toq()
