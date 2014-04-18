@@ -74,31 +74,72 @@ julia -p n para_simulated_data.jl
 ```
 to test the parallelization for simulated data. (n is the number of processors)
 
-Run time: (Telsa)
+Run time vs number of processors: (Telsa)
 
-(1) p = 1: Total time used in transit_detection!():235.974000392
+(1) n = 1: Total time used in transit_detection!():235.974000392
 
-(2) p = 2: Total time used in transit_detection!():123.928522869
+(2) n = 2: Total time used in transit_detection!():123.928522869
 
-(3) p = 3: Total time used in transit_detection!():128.286416456
+(3) n = 3: Total time used in transit_detection!():128.286416456
 
-(4) p = 4: Total time used in transit_detection!():99.218811207
+(4) n = 4: Total time used in transit_detection!():99.218811207
 
-(5) p = 5: Total time used in transit_detection!():107.634166859 
+(5) n = 5: Total time used in transit_detection!():107.634166859 
 
-(6) p = 6: Total time used in transit_detection!():71.39507179
+(6) n = 6: Total time used in transit_detection!():71.39507179
 
-(7) p = 7: Total time used in transit_detection!():71.575478587
+(7) n = 7: Total time used in transit_detection!():71.575478587
 
-(8) p = 8: Total time used in transit_detection!():57.220656825
+(8) n = 8: Total time used in transit_detection!():57.220656825
 
-(9) p = 9: Total time used in transit_detection!():57.918904511
+(9) n = 9: Total time used in transit_detection!():57.918904511
 
-(10) p = 10: Total time used in transit_detection!():50.570660036
+(10) n = 10: Total time used in transit_detection!():50.570660036
 
-(11) p = 11: Total time used in transit_detection!():48.488129586
+(11) n = 11: Total time used in transit_detection!():48.488129586
 
 We see the increase of processors makes the process time significantly decrease. 
-The reason why p=2 & 3, p= 4 & 5, p= 6 & 7 , p = 8 & 9, p = 10 & 11 spent similar time will be explained later.
+The reason why p=2 & 3, p= 4 & 5, p= 6 & 7 , p = 8 & 9, p = 10 & 11 spent similar time is: The parallelization is using distributed arrays: distribute a 2d array of indices (i,j) into different processors, the default setup is even distribution. But for our transit search, we don't need all indices - for a given period value p[i], the number of the trial durations is int(p[i]/t_avg_step),so we only need the corresponding duration array index to go from 1 to int(p[i]/t_avg_step), so at a large period array index i, we need a larger duration array index j. It's similar to a triangular matrix, so when this 2d array is evenly distributed, this triangular array is not evenly distributed.
+
+To fix this:
+
+Instead of using a 2d distributed array, just use a 1d distributed array to store the index (i,j), i.e. an array of tuples, see the code here:
+```
+oned_idx = Any[]
+for i=1:length_p
+    length_d = int(p[i]/avg_t_step)
+    for j = 1:length_d
+        append!(oned_idx,[(i,j)])
+    end
+end
+idx = distribute(oned_idx)
+```
+After this modification, the run time for different processors are:
+
+(1) n = 1: Total time used in transit_detection!():215.752591133
+
+(2) n = 2: Total time used in transit_detection!():123.095294461
+
+(3) n = 3: Total time used in transit_detection!():90.721392053
+
+(4) n = 4: Total time used in transit_detection!():75.883206517
+
+(5) n = 5: Total time used in transit_detection!():68.422990043
+
+(6) n = 6: Total time used in transit_detection!():64.156633272
+
+(7) n = 7: Total time used in transit_detection!():54.97174648
+
+(8) n = 8: Total time used in transit_detection!():51.917523137
+
+(9) n = 9: Total time used in transit_detection!():46.779422036
+
+(10) n = 10: Total time used in transit_detection!():49.136618533
+
+(11) n = 11: Total time used in transit_detection!():44.801815168
+
+Compared to the previous results, this shows much better parallization.
+
+
 
 [1]Aigran & Irwin 2004 (http://arxiv.org/abs/astro-ph/0401393)
