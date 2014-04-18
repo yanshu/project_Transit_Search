@@ -63,18 +63,18 @@ Run Time: 2225.0 s on Tesla with 1 core.
 ### Parallelization using distributed arrays
 
 para_functions.jl shows the core functions needed for parallelization of the original code. Most of the functions in it are the same with functions.jl , the most important change is in transit_detection!() funcntion, where the 3-layer for loops is modified and a new function get_in_transit_index_and_calc_logQ! is created to make it easy to parallelize:
-'''
+```
 for i=1:length_p            # loop through all trial periods
         for j=1:max_length_d_and_e      # loop through all trial durations for this period
             (best_p,best_d,best_e,best_logQ) = get_in_transit_index_and_calc_logQ!(foldedTIME[i], foldedFLUX[i],p,d,e,i,j,best_logQ,best_p,best_d,best_e,avg_t_step,noise)
         end
     end
-'''
+```
 
 Run 
-'''
+```
 julia -p n para_simulated_data.jl 
-'''
+```
 to test the parallelization for simulated data.
 
 
