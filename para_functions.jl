@@ -1,106 +1,68 @@
-# This script contains five functions.
-# (1) transit_detection!()
-# (2) get_in_transit_index_and_calc_logQ!()
-# (3) get_in_transit_index!()
-# (4) calculate_logQ!()
-# (5) phase_folding!()
+using Distributions
 
-# Compared with non-parallelization functions, the biggest change is in
-# transit_detection!() function, and a new function get_in_transit_index_and_calc_logQ!()
-# The other three functions are the same.
-
-function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min::Float64,trial_f_max::Float64)
-    println("Entering transit_detection function ... ")
-    @assert length(TIME) == length(FLUX)
-    @assert typeof(length_f) == Int64
-    tot = TIME[end]-TIME[1]        # total time span, the trial_f_min must be larger than 1/tot
-    @assert trial_f_min >= 1/tot
-
-    # get the noise for FLUX array
-    median_value = median(FLUX)
-    noise = median(abs(FLUX - median_value))	# noise is defined as MAD, median absolute deviation
-    
-    # get the avage time gap between consecutive data points avg_t_step, it will be used as the trial duration and epoch step
-    tic()
-    n = length(TIME)
-    sum_time_gaps = 0
-    n_time_gaps = 0
-    for i=2:n
-        if(TIME[i]-TIME[i-1]<5)     # significant time gaps are not counted
-            sum_time_gaps += TIME[i] - TIME[i-1]
-            n_time_gaps += 1
-        end
-    end
-    avg_t_step = sum_time_gaps/n_time_gaps	# uncomment this line for simulated_data test, this should be the default definition for avg_t_step
-    println("Time used in getting avg_t_step:",toq())
-    #avg_t_step = 0.003 		# uncomment this line for the one_planet_test, use a larger step to get a quick test
-    println("   trial duration and trial epoch step: avg_t_step = ", avg_t_step)
-
-    # get the trial arrays p[], d[] and e[]
-    tic()
-    p=zeros(Float64,length_f)
-    length_p = length_f
-    df = (trial_f_max - trial_f_min)/length_f   # trial frequency step
-    for i=1:length_p
-        p[i]= 1./(trial_f_max - (i-1)*df)
-    end
-    max_length_d = max_length_e = int(p[end]/avg_t_step)
-    d=zeros(Float64,max_length_d)
-    e=zeros(Float64,max_length_e)
-    for i=1:max_length_d	 # p[end]/avg_t_step is the largest possible length for the duration array, even though we only need a portion of them, because given a duration value d[i], the length of e we need is only length_d-i+1
-        d[i] = avg_t_step*i      # trial duration and epoch step = avg_t_step
-	e[i] = avg_t_step*(i-1)		# e[1] = 0.
-    end
-    println("Time used in getting trial arrays p, e and d: ",toq())
-
-    # calculate log10(Q)(p,d,e) for each trial period, trial duration, trial epoch
-    logQ_all = Array(Any,length_p,max_length_d)
-    (best_logQ,best_p,best_d,best_e) = (-10000.,0.,0.,0.)		# best_logQ: the largest logQ for all (p,d,e), initialized to be a very small value, best_p, best_d, best_e are the corresponding period, duration and epoch 
-    
-    time_phase_folding = 0.	# record the time for doing phase folding
-    time_calc_logQ = 0.
-
-    tic()
-    println("  Entering phase folding ...")
-    foldedTIME = Array(Array,length_p)
-    foldedFLUX = Array(Array,length_p)
-    for i=1:length_p		# loop through all trial periods
-        (foldedTIME[i],foldedFLUX[i]) = phase_folding!(TIME,FLUX,p[i],avg_t_step)
-    end
-    time_phase_folding =  toq()
-    println("  Finished phase folding.")
-
-    tic()
-    println("  Entering calculation of logQ ... ")
-    idx = distribute([ (i,j) for i in 1:length_p, j in 1:max_length_d])
-    proclist = procs(idx)
-    refs = [@spawnat proclist[proc] map(tuple->get_in_transit_index_and_calc_logQ!(tuple,foldedTIME,foldedFLUX,p,d,e,avg_t_step,noise),localpart(idx)) for proc in 1:length(proclist)]
-    result = Any[]
-    for proc in 1:length(proclist)
-	sub_array = fetch(refs[proc])
-	for l= length(sub_array)
-		result = append!(result,[sub_array[l]])
+function getSimulatedArray(n::Int64,p::Float64,d::Float64)
+	TIME = zeros(n)
+	for i=1:n
+		TIME[i] += i
 	end
-	println("size of array from Processor No.",proclist[proc]," = ",length(fetch(refs[proc])))
-    end
-    println("   Finishing calculation of logQ")
-    time_calc_logQ = toq()
-
-    for n=1:length(result)
-	if(result[n][4]>best_logQ)
-       		(best_p,best_d,best_e,best_logQ) = result[n] 
-       	end
-    end
-    
-    println("Finishing transit detection, of all trial periods,durations and epochs, the best one is : (best_p, best_d, best_e) = ",(best_p, best_d, best_e), "\n")
-    println("Time used in phase folding: ", time_phase_folding)
-    println("Time used in calculation of logQ: ", time_calc_logQ)
-    return (best_p,best_d,best_e,best_logQ)
+	FLUX = randn(n)*0.1
+	e = [50+p*i for i=0:ifloor((n-50)/p)]		# all the starting time of transits 
+	for e_idx = 1:length(e)
+		for i=e[e_idx]:e[e_idx]+d
+			FLUX[i] += -1.+rand()*0.1
+		end
+	end
+	return (TIME,FLUX)
 end
 
-@everywhere function get_in_transit_index_and_calc_logQ!(idx::(Int64,Int64),foldedTIME::Array,foldedFLUX::Array,p::Array,d::Array,e::Array,avg_t_step::Float64,noise::Float64)
-	i = idx[1]
-	j = idx[2]
+function phase_folding!(TIME::Array, FLUX::Array, period::Float64, avg_t_step::Float64)
+    @assert length(TIME) == length(FLUX)
+    #println("  Entering phase_folding function")
+    n_time = length(TIME)
+    #println("  before phase folding, length of FLUX array = ", n_time)
+    t0 = TIME[1]
+    phase=zeros(Float64,n_time)
+    for i=2:n_time
+        t = TIME[i]
+        phase[i] = mod((t-t0),period)   #phase's range is [0,period]
+    end
+    p=sortperm(phase)
+    foldedTIME = phase[p]   # sort the TIME array
+    foldedFLUX = FLUX[p]    # sort the FLUX array accordingly
+	
+    # now the foldedFLUX array has the same data points as the input FLUX array, a lot of data points will be very close in time,
+    # we want to combine data points that are very near to each other as one new data point
+    # this time window is set to: avg_t_step
+    mergedLength = 1+ifloor(foldedTIME[end]/avg_t_step)  # number of bins for this new merged flux array
+    mergedTIME =zeros(mergedLength)
+    mergedFLUX =zeros(mergedLength)
+    j = 1
+    good_index = Int64[]	# some of bins may have empty data points, i.e. there isn't any data points inside that bin, that's why we need an array good_index[] to record the non zero flux's indices
+    for index = 1:mergedLength
+        length_one_merged = 0		# the number of merged data points that are within the time window
+        while j <= n_time && index == 1+ifloor(foldedTIME[j]/avg_t_step)
+                mergedTIME[index] += foldedTIME[j]
+                mergedFLUX[index] += foldedFLUX[j]
+                j+=1
+                length_one_merged += 1
+        end
+	if length_one_merged >0			# when this bin is not empty, store the index in good_index[]
+       		append!(good_index,[index])
+		mergedTIME[index] /= length_one_merged		# the average time of the merged point
+        	mergedFLUX[index] /= length_one_merged		# the average flux value of the merged point
+	end
+    end
+    goodMergedTIME = Float64[]          # the final flux and time array it returns
+    goodMergedFLUX = Float64[]
+    for i=1:length(good_index)
+        append!(goodMergedTIME,[mergedTIME[good_index[i]]])
+        append!(goodMergedFLUX,[mergedFLUX[good_index[i]]])
+    end
+    #println("  Exiting phase_folding, after phase folding, length of FLUX array = ", length(goodMergedFLUX))
+    return (goodMergedTIME, goodMergedFLUX)
+end
+
+@everywhere function get_in_transit_index_and_calc_logQ!(foldedTIME::Array,foldedFLUX::Array,p::Array,d::Array,e::Array,i::Int64,j::Int64,avg_t_step::Float64,noise::Float64)
 	trial_p = p[i]
 	trial_d = d[j]
 	j_max = int(trial_p/avg_t_step)
@@ -110,12 +72,12 @@ end
 		current_idx = 1                     # the index used in the searching for transit times
         	for k=1:k_max
         	    trial_e = e[k]
-        	    I_index = get_in_transit_index!(foldedTIME[i],trial_e,trial_d,current_idx)         # get the indices of all in-transit data points
+        	    I_index = get_in_transit_index!(foldedTIME,trial_e,trial_d,current_idx)         # get the indices of all in-transit data points
         	    if length(I_index)==0                   # if there is no in-transit data points, move to the next epoch
         	            current_idx+=1
         	            continue
         	    else                            # if there is in-transit data points, calculate the logQ value for these points
-        	            logQ = calculate_logQ!(I_index,foldedFLUX[i],trial_p,trial_d,trial_e,noise)
+        	            logQ = calculate_logQ!(I_index,foldedFLUX,trial_p,trial_d,trial_e,noise)
 			    if(logQ>local_best_logQ)                                   
 				(local_best_e,local_best_logQ) = (trial_e,logQ)
                             end
@@ -165,75 +127,123 @@ end
     return I_index
 end
 
-function phase_folding!(TIME::Array, FLUX::Array, period::Float64, avg_t_step::Float64)
-    @assert length(TIME) == length(FLUX)
-    #println("  Entering phase_folding function ... ")
-    n_time = length(TIME)
-    #println("   before phase folding, length of FLUX array = ", n_time)
-    t0 = TIME[1]
-    phase=zeros(Float64,n_time)
-    for i=2:n_time
-        t = TIME[i]
-        phase[i] = mod((t-t0),period)   #phase's range is [0,period]
-    end
-    p=sortperm(phase)
-    foldedTIME = phase[p]   # sort the TIME array
-    foldedFLUX = FLUX[p]    # sort the FLUX array accordingly
-	
-    # now the foldedFLUX array has the same data points as the input FLUX array, a lot of data points will be very close in time,
-    # we want to combine data points that are very near to each other as one new data point
-    # this time window is set to: avg_t_step
-    mergedLength = 1+ifloor(foldedTIME[end]/avg_t_step)  # number of bins for this new merged flux array
-    mergedTIME =zeros(mergedLength)
-    mergedFLUX =zeros(mergedLength)
-    j = 1
-    good_index = Int64[]	# some of bins may have empty data points, i.e. there isn't any data points inside that bin, that's why we need an array good_index[] to record the non zero flux's indices
-    for index = 1:mergedLength
-        length_one_merged = 0		# the number of merged data points that are within the time window
-        while j <= n_time && index == 1+ifloor(foldedTIME[j]/avg_t_step)
-                mergedTIME[index] += foldedTIME[j]
-                mergedFLUX[index] += foldedFLUX[j]
-                j+=1
-                length_one_merged += 1
-        end
-	if length_one_merged >0			# when this bin is not empty, store the index in good_index[]
-       		append!(good_index,[index])
-		mergedTIME[index] /= length_one_merged		# the average time of the merged point
-        	mergedFLUX[index] /= length_one_merged		# the average flux value of the merged point
+@everywhere function func(idx::Array,foldedTIME::Array,foldedFLUX::Array,p::Array,d::Array,e::Array,avg_t_step::Float64,noise::Float64)
+	result = Array((Float64,Float64,Float64,Float64),length(idx))
+	println("entered func()")
+	for l=1:length(idx)
+		i = idx[l][1]
+		j = idx[l][2]
+		result[l] = get_in_transit_index_and_calc_logQ!(foldedTIME[i],foldedFLUX[i],p,d,e,i,j,avg_t_step,noise)
 	end
-    end
-    goodMergedTIME = Float64[]          # the final flux and time array it returns
-    goodMergedFLUX = Float64[]
-    for i=1:length(good_index)
-        append!(goodMergedTIME,[mergedTIME[good_index[i]]])
-        append!(goodMergedFLUX,[mergedFLUX[good_index[i]]])
-    end
-    #println("   after phase folding, length of FLUX array = ", length(goodMergedFLUX))
-    return (goodMergedTIME, goodMergedFLUX)
+	return result
 end
 
-function getSegmentIndex(Ngood::Int64, Nbad::Int64,index::Array)
-    # Ngood: minimum number of good points in a row
-    # Nbad:  number of bad points in a row makes the segment break
-    n = length(index)
-    segment = Any[]
-    push!(segment,[index[1]])
-    for i = 1:n-1
-        Nseg = length(segment)         # the current length of segment[]
-        if (Nseg == 0)
-            push!(segment,[index[i+1]])
-        else
-            if(index[i+1] - index[i] < Nbad)
-                append!(segment[Nseg],[index[i+1]])
-            elseif(length(segment[Nseg]) < Ngood)
-                pop!(segment)
-            else
-                push!(segment,[index[i+1]])
-            end
+function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min::Float64,trial_f_max::Float64,func::Function)
+    println("Entering transit_detection function")
+    @assert length(TIME) == length(FLUX)
+    @assert typeof(length_f) == Int64
+    tot = TIME[end]-TIME[1]        # total time span, the trial_f_min must be larger than 1/tot
+    @assert trial_f_min >= 1/tot
+
+    # get the noise for FLUX array
+    median_value = median(FLUX)
+    noise = median(abs(FLUX - median_value))	# noise is defined as MAD, median absolute deviation
+    
+    # get the avage time gap between consecutive data points avg_t_step, it will be used as the trial duration and epoch step
+    tic()
+    n = length(TIME)
+    sum_time_gaps = 0
+    n_time_gaps = 0
+    for i=2:n
+        if(TIME[i]-TIME[i-1]<5)     # significant time gaps are not counted
+            sum_time_gaps += TIME[i] - TIME[i-1]
+            n_time_gaps += 1
         end
     end
-    if(length(segment[end]) < Ngood)        # check the last element
-        pop!(segment)
-        end
-    return segment
+    avg_t_step = sum_time_gaps/n_time_gaps	# use the normal definition for simulated_data test
+    println("Time used in getting avg_t_step:",toq())
+    #avg_t_step = 0.003 		# for the one_planet_test, use 0.003, a larger step to speed things up
+    println("   trial duration and trial epoch step: avg_t_step = ", avg_t_step)
+
+    # get the trial arrays p[], d[] and e[]
+    tic()
+    p=zeros(Float64,length_f)
+    length_p = length_f
+    df = (trial_f_max - trial_f_min)/length_f   # trial frequency step
+    for i=1:length_p
+        p[i]= 1./(trial_f_max - (i-1)*df)
+    end
+    max_length_d = max_length_e = int(p[end]/avg_t_step)
+    d=zeros(Float64,max_length_d)
+    e=zeros(Float64,max_length_e)
+    for i=1:max_length_d	 # p[end]/avg_t_step is the largest possible length for the duration array, even though we only need a portion of them, because given a duration value d[i], the length of e we need is only length_d-i+1
+        d[i] = avg_t_step*i      # trial duration and epoch step = avg_t_step
+	e[i] = avg_t_step*(i-1)		# e[1] = 0.
+    end
+    println("Time used in getting trial arrays p, e and d: ",toq())
+
+    # calculate log10(Q)(p,d,e) for each trial period, trial duration, trial epoch
+    logQ_all = Array(Any,length_p,max_length_d)
+    (best_logQ,best_p,best_d,best_e) = (-10000.,0.,0.,0.)		# best_logQ: the largest logQ for all (p,d,e), initialized to be a very small value, best_p, best_d, best_e are the corresponding period, duration and epoch 
+    
+    time_phase_folding = 0.	# record the time for doing phase folding
+    #time_get_in_transit_index_and_calc_logQ  = 0.
+    time_calc_logQ = 0.
+
+    tic()
+    println("  Entering phase folding ...")
+    foldedTIME = Array(Array,length_p)
+    foldedFLUX = Array(Array,length_p)
+    for i=1:length_p		# loop through all trial periods
+        (foldedTIME[i],foldedFLUX[i]) = phase_folding!(TIME,FLUX,p[i],avg_t_step)
+    end
+    time_phase_folding =  toq()
+    println("  Finished phase folding.")
+
+    tic()
+    #println("  Entering get_in_transit_index_and_calc_logQ!() function ...")
+    println("  Entering calculation of logQ ... ")
+    idx = distribute([ (i,j) for i in 1:length_p, j in 1:max_length_d])
+    proclist = procs(idx)
+    refs = [@spawnat proclist[proc] func(localpart(idx),foldedTIME,foldedFLUX,p,d,e,avg_t_step,noise) for proc in 1:length(proclist)]
+    result = Any[]
+    for proc in 1:length(proclist)
+ 	result = append!(result,fetch(refs[proc]))
+        println("size of array from Processor No.",proclist[proc]," = ",length(fetch(refs[proc])))
+    end
+    println("   Finishing calculation of logQ")
+    time_calc_logQ = toq()
+
+    tic()
+    for n=1:length(result)
+	if(result[n][4]>best_logQ)
+       		(best_p,best_d,best_e,best_logQ) = result[n] 
+       	end
+    end
+    println("   Time spent on finding the maximum logQ = ", toq())
+
+    #println("  Finished get_in_transit_index_and_calc_logQ!() function.")
+    
+    println("Finishing transit detection, of all trial periods,durations and epochs, the best one is : (best_p, best_d, best_e) = ",(best_p, best_d, best_e), "\n")
+    println("Time used in phase folding: ", time_phase_folding)
+    println("Time used in calculation of logQ: ", time_calc_logQ)
+    #println("Time used in get_in_transit_index_and_calc_logQ!(): ", time_get_in_transit_index_and_calc_logQ)
+    return (best_p,best_d,best_e,best_logQ)
 end
+
+# generate a simulated TIME and FLUX array with period = 400, duration = 25, epoch = 50
+(TIME,FLUX) = getSimulatedArray(1000,400.,25.)
+
+#plot FLUX vs TIME
+#plotEverything(TIME,FLUX,"97.01")
+
+println("nprocs :", nprocs())
+# use Aigrian & Irwin's method to search for the period, epoch and duration that gives the biggest log10(Q) value (see more about this in README)
+# the input parameters are (TIME, FLUX, length_p,f_min, f_max), where length_f is the length of the trial frequency array,
+# f_min and f_max are the minimum and maximum trial frequency. f_min must >= 1/total time span.
+
+(length_f,f_min, f_max) = (100,1/403.,1/397.)
+tic()
+transit_detection!(TIME,FLUX,length_f,f_min, f_max,func)
+println("Total time used in transit_detection!():",toq())
+
