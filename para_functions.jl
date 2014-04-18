@@ -9,7 +9,9 @@
 # and one function for getting usable segment indices:
 # (7) getSetmentIndex()
 
-#Most of the functions here are the same with serialized functions. The biggest change is in transit_detection!() where the original three-layer for loop is modified and two new functions are added to make it easy to parallelize. The parallelization method is distributed arrays. The index [i,j] is distributed over different processors.
+#Most of the functions here are the same with serialized functions. The biggest change is in transit_detection!() where 
+#the original three-layer for loop is modified and two new functions are added to make it easy to parallelize. 
+#The parallelization method is using distributed arrays. The index [i,j] is distributed over different processors.
 
 function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min::Float64,trial_f_max::Float64,func::Function)
     println("Entering transit_detection function")
