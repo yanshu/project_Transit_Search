@@ -230,20 +230,3 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
     #println("Time used in get_in_transit_index_and_calc_logQ!(): ", time_get_in_transit_index_and_calc_logQ)
     return (best_p,best_d,best_e,best_logQ)
 end
-
-# generate a simulated TIME and FLUX array with period = 400, duration = 25, epoch = 50
-(TIME,FLUX) = getSimulatedArray(1000,400.,25.)
-
-#plot FLUX vs TIME
-#plotEverything(TIME,FLUX,"97.01")
-
-println("nprocs :", nprocs())
-# use Aigrian & Irwin's method to search for the period, epoch and duration that gives the biggest log10(Q) value (see more about this in README)
-# the input parameters are (TIME, FLUX, length_p,f_min, f_max), where length_f is the length of the trial frequency array,
-# f_min and f_max are the minimum and maximum trial frequency. f_min must >= 1/total time span.
-
-(length_f,f_min, f_max) = (100,1/403.,1/397.)
-tic()
-transit_detection!(TIME,FLUX,length_f,f_min, f_max,func)
-println("Total time used in transit_detection!():",toq())
-
