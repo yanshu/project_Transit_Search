@@ -5,7 +5,7 @@
 # (3) calculate_logQ!()
 # (4) get_in_transit_index!()
 # and two other functions for getting usable segment indices and plotting flux vs time:
-# (5) plot_Everything()
+# (5) plotEverything()
 # (6) getSetmentIndex()
 
 function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min::Float64,trial_f_max::Float64)
