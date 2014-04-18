@@ -11,7 +11,9 @@ The main steps of transit_detection!() is: (1) For a given trial period value, d
 
 Purpose: given the input time and flux array, fold the array using period p. After the folding, the time range is [0,p]. It has two steps: (1) Fold all data points into a time range[0,p]; (2) Merge all data points that're within one small time window (set as t_avg_step), since after the first step, the density of the data points will increase, combine data points that are too close to each other as one new data point can accelerate the algorithm.
 
-### Simulated data test
+### Test without parallelization
+
+#### Simulated data test
 
 test_simulated_data.jl uses a simulated data set for a simple test. (To run this test, remember to comment line36 in functions.jl and uncomment line33; because we need the avg_t_step parameter to be set as the default definition)
 
@@ -21,31 +23,32 @@ Run the code with trial frequency range [1/403, 1/397] and number of trial frequ
 Run Time: It uses 147.44s to run on a laptop with a 2.9 GHz Intel Core i7 and 8 GB memroy. It uses 160.0s to run on Tesla with 1 core. Most of the process time is spent in the get_in_transit_index() function:
 
 (1) number of total input data points: 1000:
-total run time = 159.3 s, Time used in phase folding: 0.046 s
-Time used in get_in_transit_index: 137.26 s
-Time used in calculate_logQ: 9.11 s
+Time used in phase folding: 0.09459777300000001
+Time used in get_in_transit_index: 190.12969029804088
+Time used in calculate_logQ: 8.025332680003013
+Total time used in transit_detection!(): 211.536398995 seconds
+Result: (399.5579641376555,26.0,49.0)
 
 (2) number of total input data points: 10000:
-total run time = 158.6 s, time spend in phase folding:  0.289 s
-Time used in calculate_logQ: 9.32 s
-Time used in get_in_transit_index: 136.40 s
+Time used in phase folding: 0.217275445
+Time used in get_in_transit_index: 166.29636909701702
+Time used in calculate_logQ: 7.568610243004216
+Total time used in transit_detection!():186.867834682
+Result: (399.9775,26.0,49.0)
 
 (3) number of total input data points: 100000:
-total run time = 169.0 s, Time used in phase folding: 2.69 s
-Time used in calculate_logQ: 9.70 s
-Time used in get_in_transit_index: 143.6 s
-
-(4) number of total input data points: 1000000:
-total run time = 188.9s, time spend in phase folding:  28.16 s
-Time used in get_in_transit_index: 134.2s
-Time used in calculate_logQ: 8.78 s
+Time used in phase folding: 1.6532172079999992
+Time used in get_in_transit_index: 159.94216397200384
+Time used in calculate_logQ: 7.574739042001622
+Total time used in transit_detection!():180.057972289
+Result: (399.9775,26.0,51.0)
 
 We see: (1) Most of the process time is spent in the get_in_transit_index() function;
 (2) as the total size of input flux array increases, the total process time increases, and the time spent in phase folding increase almost linearly with input array size, while other functions spent more or less similar time.
 
 So for parallelization, we need to work on the get_in_transit_index!() function.
 
-### One planet test
+#### One planet test
 
 transit_search_test.jl is a small, crude test using true kepler data of a confirmed planet.	(To run it, remember to comment line33 in functions.jl and uncomment line36, because here we want t_avg_step to be 0.003 days)
 
@@ -57,6 +60,22 @@ The true values are: period = 4.88548917 days, duration = 5.2295 hours
 Run Time: 2225.0 s on Tesla with 1 core.
 
 
+### Parallelization using distributed arrays
+
+para_functions.jl shows the core functions needed for parallelization of the original code. Most of the functions in it are the same with functions.jl , the most important change is in transit_detection!() funcntion, where the 3-layer for loops is modified and a new function get_in_transit_index_and_calc_logQ! is created to make it easy to parallelize:
+'''
+for i=1:length_p            # loop through all trial periods
+        for j=1:max_length_d_and_e      # loop through all trial durations for this period
+            (best_p,best_d,best_e,best_logQ) = get_in_transit_index_and_calc_logQ!(foldedTIME[i], foldedFLUX[i],p,d,e,i,j,best_logQ,best_p,best_d,best_e,avg_t_step,noise)
+        end
+    end
+'''
+
+Run 
+'''
+julia -p n para_simulated_data.jl 
+'''
+to test the parallelization for simulated data.
 
 
 [1]Aigran & Irwin 2004 (http://arxiv.org/abs/astro-ph/0401393)
