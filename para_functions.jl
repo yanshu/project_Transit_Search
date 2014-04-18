@@ -76,7 +76,15 @@ function transit_detection!(TIME::Array,FLUX::Array,length_f::Int64,trial_f_min:
 
     tic()
     println("  Entering calculation of logQ ... ")
-    idx = distribute([ (i,j) for i in 1:length_p, j in 1:max_length_d])
+    oned_idx = Any[]
+    for i=1:length_p
+	length_d = int(p[i]/avg_t_step)
+	for j = 1:length_d
+		append!(oned_idx,[(i,j)])
+	end
+    end
+    idx = distribute(oned_idx)
+    #idx = distribute([ (i,j) for i in 1:length_p, j in 1:max_length_d])
     proclist = procs(idx)
     refs = [@spawnat proclist[proc] func(localpart(idx),foldedTIME,foldedFLUX,p,d,e,avg_t_step,noise) for proc in 1:length(proclist)]
     result = Any[]
