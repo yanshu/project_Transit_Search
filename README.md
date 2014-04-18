@@ -138,7 +138,11 @@ After this modification, the run time for different processors are:
 
 (11) n = 11: Total time used in transit_detection!():44.801815168
 
+(12) n = 12: Total time used in transit_detection!():42.965138617
+
 Compared to the previous results, this shows much better parallization.
+
+
 
 
 
