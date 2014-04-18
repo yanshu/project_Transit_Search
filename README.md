@@ -3,7 +3,7 @@
 
 This project searches for transiting planets candidates in Kepler data using Aigran & Irwin's transit search algorithm[1]. The basic idea is: loop through different trial periods, trial transit durations and trial transit epochs, find out which (p, d, e) maximizes the Q value, which is basically the square of the signal to noise ratio (SNR). In our code, we use log10(Q) instead of just Q.  
 
-The core code for transit search is the function: transit_detection!(), whose input parameters are: (TIME,FLUX,length_f,f_min, f_max). TIME and FLUX are the preprocessed time array and flux array, length_f is the number of trial frequencies, f_min, f_max are the minimum and maximum trial frequencies. The output of transit_detection!() is ((best_p,best_d,best_e,best_logQ,logQ_p), i.e. the best estimated period, transit duration and epoch, the corresponding logQ value and the array that stores each logQ value for each trial period.
+functions.jl and para_functions.jl contain all the functions for this project. The former is the serial vesion, and the latter is the parallel version. The core function is: transit_detection!(), whose input parameters are: (TIME,FLUX,length_f,f_min, f_max). TIME and FLUX are the preprocessed time array and flux array, length_f is the number of trial frequencies, f_min, f_max are the minimum and maximum trial frequencies. The output of transit_detection!() is ((best_p,best_d,best_e,best_logQ,logQ_p), i.e. the best estimated period, transit duration and epoch, the corresponding logQ value and the array that stores each logQ value for each trial period.
 
 The main steps of transit_detection!() is: (1) For a given trial period value, do phase folding; (2) For each trial duration and trial epoch, identify the in-transit data points in this phased flux, and calculate the logQ for it; (3) Compare all logQ values, get the maximum logQ, then the corresponding (p, e, d) is the best estimated result.
 
@@ -143,7 +143,30 @@ After this modification, the run time for different processors are:
 Compared to the previous results, this shows much better parallization.
 
 
+#### One planet test
+
+Run
+```
+julia -p n para_one_planet.jl
+```
+to do the parallelization for the real data test.
+
+Run time vs number of processors:
+
+(1)
+
+(2)
+
+(3)
+
+(4)
+
+(5) n = 5, run time: 
+
+(6) n = 6, run time: 605.452938523 seconds
 
 
 
+
+ 
 [1]Aigran & Irwin 2004 (http://arxiv.org/abs/astro-ph/0401393)
