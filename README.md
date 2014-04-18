@@ -92,6 +92,13 @@ Run time: (Telsa)
 
 (8) p = 8: Total time used in transit_detection!():57.220656825
 
-The reason why p=2 & 3, p=4&5 p=6&7 spent similar time will be explained later.
+(9) p = 9: Total time used in transit_detection!():57.918904511
+
+(10) p = 10: Total time used in transit_detection!():50.570660036
+
+(11) p = 11: Total time used in transit_detection!():48.488129586
+
+We see the increase of processors makes the process time significantly decrease. 
+The reason why p=2 & 3, p= 4 & 5, p= 6 & 7 , p = 8 & 9, p = 10 & 11 spent similar time will be explained later.
 
 [1]Aigran & Irwin 2004 (http://arxiv.org/abs/astro-ph/0401393)
