@@ -23,25 +23,25 @@ Run the code with trial frequency range [1/403, 1/397] and number of trial frequ
 Run Time: It uses 147.44s to run on a laptop with a 2.9 GHz Intel Core i7 and 8 GB memroy. It uses 160.0s to run on Tesla with 1 core. Most of the process time is spent in the get_in_transit_index() function:
 
 (1) number of total input data points: 1000:
-Time used in phase folding: 0.09459777300000001
-Time used in get_in_transit_index: 190.12969029804088
-Time used in calculate_logQ: 8.025332680003013
-Total time used in transit_detection!(): 211.536398995 seconds
-Result: (399.5579641376555,26.0,49.0)
+    Time used in phase folding: 0.09459777300000001
+    Time used in get_in_transit_index: 190.12969029804088
+    Time used in calculate_logQ: 8.025332680003013
+    Total time used in transit_detection!(): 211.536398995 seconds
+    Result: (399.5579641376555,26.0,49.0)
 
 (2) number of total input data points: 10000:
-Time used in phase folding: 0.217275445
-Time used in get_in_transit_index: 166.29636909701702
-Time used in calculate_logQ: 7.568610243004216
-Total time used in transit_detection!():186.867834682
-Result: (399.9775,26.0,49.0)
+    Time used in phase folding: 0.217275445
+    Time used in get_in_transit_index: 166.29636909701702
+    Time used in calculate_logQ: 7.568610243004216
+    Total time used in transit_detection!():186.867834682
+    Result: (399.9775,26.0,49.0)
 
 (3) number of total input data points: 100000:
-Time used in phase folding: 1.6532172079999992
-Time used in get_in_transit_index: 159.94216397200384
-Time used in calculate_logQ: 7.574739042001622
-Total time used in transit_detection!():180.057972289
-Result: (399.9775,26.0,51.0)
+    Time used in phase folding: 1.6532172079999992
+    Time used in get_in_transit_index: 159.94216397200384
+    Time used in calculate_logQ: 7.574739042001622
+    Total time used in transit_detection!():180.057972289
+    Result: (399.9775,26.0,51.0)
 
 We see: (1) Most of the process time is spent in the get_in_transit_index() function;
 (2) as the total size of input flux array increases, the total process time increases, and the time spent in phase folding increase almost linearly with input array size, while other functions spent more or less similar time.
@@ -76,27 +76,27 @@ to test the parallelization for simulated data. (n is the number of processors)
 
 Run time vs number of processors: (Telsa)
 
-(1) n = 1: Total time used in transit_detection!():235.974000392
+(1) n = 1: Total time used in transit_detection!(): 235.974000392
 
-(2) n = 2: Total time used in transit_detection!():123.928522869
+(2) n = 2: Total time used in transit_detection!(): 123.928522869
 
-(3) n = 3: Total time used in transit_detection!():128.286416456
+(3) n = 3: Total time used in transit_detection!(): 128.286416456
 
-(4) n = 4: Total time used in transit_detection!():99.218811207
+(4) n = 4: Total time used in transit_detection!(): 99.218811207
 
-(5) n = 5: Total time used in transit_detection!():107.634166859 
+(5) n = 5: Total time used in transit_detection!(): 107.634166859 
 
-(6) n = 6: Total time used in transit_detection!():71.39507179
+(6) n = 6: Total time used in transit_detection!(): 71.39507179
 
-(7) n = 7: Total time used in transit_detection!():71.575478587
+(7) n = 7: Total time used in transit_detection!(): 71.575478587
 
-(8) n = 8: Total time used in transit_detection!():57.220656825
+(8) n = 8: Total time used in transit_detection!(): 57.220656825
 
-(9) n = 9: Total time used in transit_detection!():57.918904511
+(9) n = 9: Total time used in transit_detection!(): 57.918904511
 
-(10) n = 10: Total time used in transit_detection!():50.570660036
+(10) n = 10: Total time used in transit_detection!(): 50.570660036
 
-(11) n = 11: Total time used in transit_detection!():48.488129586
+(11) n = 11: Total time used in transit_detection!(): 48.488129586
 
 We see the increase of processors makes the process time significantly decrease. 
 The reason why p=2 & 3, p= 4 & 5, p= 6 & 7 , p = 8 & 9, p = 10 & 11 spent similar time is: The parallelization is using distributed arrays: distribute a 2d array of indices (i,j) into different processors, the default setup is even distribution. But for our transit search, we don't need all indices - for a given period value p[i], the number of the trial durations is int(p[i]/t_avg_step),so we only need the corresponding duration array index to go from 1 to int(p[i]/t_avg_step), so at a large period array index i, we need a larger duration array index j. It's similar to a triangular matrix, so when this 2d array is evenly distributed, this triangular array is not evenly distributed.
@@ -116,29 +116,29 @@ idx = distribute(oned_idx)
 ```
 After this modification, the run time for different processors are:
 
-(1) n = 1: Total time used in transit_detection!():215.752591133
+(1) n = 1: Total time used in transit_detection!(): 215.752591133
 
-(2) n = 2: Total time used in transit_detection!():123.095294461
+(2) n = 2: Total time used in transit_detection!(): 123.095294461
 
-(3) n = 3: Total time used in transit_detection!():90.721392053
+(3) n = 3: Total time used in transit_detection!(): 90.721392053
 
-(4) n = 4: Total time used in transit_detection!():75.883206517
+(4) n = 4: Total time used in transit_detection!(): 75.883206517
 
-(5) n = 5: Total time used in transit_detection!():68.422990043
+(5) n = 5: Total time used in transit_detection!(): 68.422990043
 
-(6) n = 6: Total time used in transit_detection!():64.156633272
+(6) n = 6: Total time used in transit_detection!(): 64.156633272
 
-(7) n = 7: Total time used in transit_detection!():54.97174648
+(7) n = 7: Total time used in transit_detection!(): 54.97174648
 
-(8) n = 8: Total time used in transit_detection!():51.917523137
+(8) n = 8: Total time used in transit_detection!(): 51.917523137
 
-(9) n = 9: Total time used in transit_detection!():46.779422036
+(9) n = 9: Total time used in transit_detection!(): 46.779422036
 
-(10) n = 10: Total time used in transit_detection!():49.136618533
+(10) n = 10: Total time used in transit_detection!(): 49.136618533
 
-(11) n = 11: Total time used in transit_detection!():44.801815168
+(11) n = 11: Total time used in transit_detection!(): 44.801815168
 
-(12) n = 12: Total time used in transit_detection!():42.965138617
+(12) n = 12: Total time used in transit_detection!(): 42.965138617
 
 Compared to the previous results, this shows much better parallization.
 
@@ -149,23 +149,29 @@ Run
 ```
 julia -p n para_one_planet.jl
 ```
-to do the parallelization for the real data test.
-
+to do the parallelization for the same one plant data test. Use the same parameters, the result is the same: period = 4.890738813735692 days, duration = 4.536 hours.
+ 
 Run time vs number of processors:
 
-(1)
+(1) n = 1, run time: 
 
-(2)
+(2) n = 2, run time: 1429.745141357 seconds
 
-(3)
+(3) n = 3, run time: 999.511613143 seconds
 
-(4)
+(4) n = 4, run time: 779.576668775 seconds
 
-(5) n = 5, run time: 
+(5) n = 5, run time: 677.916969961 seconds
 
 (6) n = 6, run time: 605.452938523 seconds
 
+(7) n = 7, run time: 576.667202719 seconds
 
+(8) n = 8, run time: 518.513130904 seconds
+
+(9) n = 9, run time: 501.187991569 seconds 
+
+We see the decrease of process time as number of processors increase.
 
 
  
