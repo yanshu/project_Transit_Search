@@ -21,7 +21,7 @@ lightcurves = koi[:get_light_curves]()  # get lightcurves
 n_curves = length(lightcurves)		# the number of lightcurves
 
 #############################################################################################################################################
-#### select good data points
+##### select good data points
 
 println("Entering good data points selection...")
 
@@ -57,7 +57,7 @@ for i = 5:5        # select only the 5th lightcurve for test (can be changed to 
     println("Finished data points selection")
 
 #############################################################################################################################################
-#### identify usable light curve segments using the good data points we just got [ see segments' definition in the code]
+##### identify usable light curve segments using the good data points we just got [ see segments' definition in the code]
     
     println("Identifying and combining usable light curve segments ... ")
     ### identify usable light curve segments [ see function getSegmentIndex() in para_functions.jl]
