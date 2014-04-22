@@ -3,7 +3,7 @@
 
 This is a Astro585 project that prepares some simple code to search for transiting planets candidates in Kepler data using transit method.
 
-# Introduction
+### Introduction
 
 Kepler is a space observatory lauched by NASA in 2009, its purpose is to search for planets. It uses a photometer that records the brightness of stars. [1] A planet is defined as an astronomical object that travels arount a star. When  planet goes across the face of a star, the brightness of the star would decrease, this is called a transit, the duration of the decrease is the time the planet spends on moving across the surface, the period of a transit is equal to the orbital period of the planet, and the epoch of the transit is the start time of the first transit detected by Kepler. 
 
