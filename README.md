@@ -1,7 +1,22 @@
 
 # Transit Search
 
-This project searches for transiting planets candidates in Kepler data using Aigran & Irwin's transit search algorithm[1]. The basic idea is: loop through different trial periods, trial transit durations and trial transit epochs, find out which (p, d, e) maximizes the Q value, which is basically the square of the signal to noise ratio (SNR). In our code, we use log10(Q) instead of just Q.  
+This is a Astro585 project that prepares some simple code to search for transiting planets candidates in Kepler data using transit method.
+
+Kepler is a space observatory lauched by NASA in 2009, its purpose is to search for planets. It uses a photometer that records the brightness of stars. [1] A planet is defined as an astronomical object that travels arount a star. When  planet goes across the face of a star, the brightness of the star would decrease, this is called a transit, the duration of the decrease is the time the planet spends on moving across the surface, the period of a transit is equal to the orbital period of the planet, and the epoch of the transit is the start time of the first transit detected by Kepler. So we can use the kepler data to search for planet candidates by searching for transits: given the light curve (more specifically the "sap_flux" and "time" data inside the light curves), find out the period, duration, and epoch of the transit, and the corresponding SNR.
+
+There are different transit search algorithms. This project uses Aigran & Irwin's transit search algorithm[2]. The basic idea is: (1) divide the data points in the flux vs time plot into two bins, one in-transit bin and one out-of-transit bin, (2) loop over different trial periods (p), trial transit durations (d) and trial transit epochs (e), find out the (p, d, e) that maximizes the Q value for the data points in the in-transit bin. See the definition of Q in the Aigran & Irwin paper, it is basically the square of the signal to noise ratio (SNR) [2].
+
+###Steps
+
+The main steps of the transit search project:
+(1) Given a time array and flux array, strip out bad data points;
+
+(2) Generate arrays of trial periods, durations, and epochs;
+
+(3) For each trial periods, do phase folding;
+
+(4) Use the phase folded flux, use the Aigran & Irwin search algorithm, find out the best estimated p, d, e.
 
 functions.jl and para_functions.jl contain all the functions for this project. The former is the serial vesion, and the latter is the parallel version. The core function is: transit_detection!(), whose input parameters are: (TIME,FLUX,length_f,f_min, f_max). TIME and FLUX are the preprocessed time array and flux array, length_f is the number of trial frequencies, f_min, f_max are the minimum and maximum trial frequencies. The output of transit_detection!() is ((best_p,best_d,best_e,best_logQ,logQ_p), i.e. the best estimated period, transit duration and epoch, the corresponding logQ value and the array that stores each logQ value for each trial period.
 
@@ -153,7 +168,7 @@ to do the parallelization for the same one plant data test. Use the same paramet
  
 Run time vs number of processors:
 
-(1) n = 1, run time: 
+(1) n = 1, run time: 2418.599992104 seconds
 
 (2) n = 2, run time: 1429.745141357 seconds
 
@@ -171,8 +186,15 @@ Run time vs number of processors:
 
 (9) n = 9, run time: 501.187991569 seconds 
 
+(10) n = 10, run time: 458.875286608 seconds
+
+(11) n = 11, run time: 468.668311456 seconds
+
+(12) n = 12, run time: 437.128084147 seconds
+
 We see the decrease of process time as number of processors increase.
 
 
- 
-[1]Aigran & Irwin 2004 (http://arxiv.org/abs/astro-ph/0401393)
+
+[1] http://en.wikipedia.org/wiki/Kepler_%28spacecraft%29 
+[2]Aigran & Irwin 2004 (http://arxiv.org/abs/astro-ph/0401393)
